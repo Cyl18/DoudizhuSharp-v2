@@ -182,16 +182,27 @@ namespace DoudizhuSharp
                     var senderPlayer = new Lazy<Player>(() => game.Value.GetPlayer(message.Sender));
                     // attrib check
 
+
+                    var stateOnly = info.MethodInfo.GetCustomAttribute<StateOnlyAttribute>();
+                    if (stateOnly != null)
+                    {
+                        if (!GamesManager.Games.ContainsKey(message.Group)) throw new DoudizhuCommandParseException("该群没有游戏.");
+
+                        if (stateOnly.GameState != game.Value.State) throw new DoudizhuCommandParseException($"该命令需求游戏在以下状态{stateOnly.GameState}."); //TODO
+                    }
+
                     var playerOnly = info.MethodInfo.GetCustomAttribute<PlayerOnlyAttribute>();
                     if (playerOnly != null)
                     {
+                        if (!GamesManager.Games.ContainsKey(message.Group)) throw new DoudizhuCommandParseException("该群没有游戏.");
+                        
                         switch (playerOnly.PlayerState)
                         {
                             case PlayerState.InGame:
-                                if (!game.Value.ContainsPlayer(currentPlayer.Value)) throw new DoudizhuCommandParseException("该命令需求你在游戏中.");
+                                if (senderPlayer.Value == null) throw new DoudizhuCommandParseException("该命令需求你在游戏中.");
                                 break;
                             case PlayerState.CurrentPlayer:
-                                if (currentPlayer.Value != senderPlayer.Value) throw new DoudizhuCommandParseException("该命令需求你是当前玩家.");
+                                if (senderPlayer.Value == null || currentPlayer.Value != senderPlayer.Value) throw new DoudizhuCommandParseException("该命令需求你是当前玩家.");
                                 break;
                             case PlayerState.ChooseLandlordPlayer:
                                 if (senderPlayer.Value != game.Value.GetPlayerByIndex(((ChooseLandlordData)game.Value.StateData).LandlordIndex)) throw new DoudizhuCommandParseException("该命令需求你是当前玩家.");
@@ -201,11 +212,7 @@ namespace DoudizhuSharp
                         }
                     }
 
-                    var stateOnly = info.MethodInfo.GetCustomAttribute<StateOnlyAttribute>();
-                    if (stateOnly != null)
-                    {
-                        if (stateOnly.GameState != game.Value.State) throw new DoudizhuCommandParseException($"该命令需求游戏在以下状态{stateOnly.GameState}."); //TODO
-                    }
+                    
                     // build params
                     var iReqParams = info.MethodInfo.GetParameters();
                     Debug.Assert(iReqParams.Count(obj => obj.IsAttributeDefined<InjectAttribute>()) == 0 ||

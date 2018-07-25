@@ -34,6 +34,11 @@ namespace DoudizhuSharp.Messages
                 message.Group.GetGroupSender().Send($"错误:{e.Message}");
 
             }
+            catch (DoudizhuCommandParseException e)
+            {
+                message.Group.GetGroupSender().Send($"错误:{e.Message}");
+
+            }
             catch (Exception e)
             {
                 message.Group.GetGroupSender().Send($"错误:{e}");
