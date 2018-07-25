@@ -30,7 +30,7 @@ namespace DoudizhuSharp
         }
 
         public T Current => List[CurrentIndex];
-        public int CurrentIndex { get; private set; }
+        public int CurrentIndex { get; internal set; }
 
         object IEnumerator.Current => Current;
 

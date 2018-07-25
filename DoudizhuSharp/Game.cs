@@ -90,6 +90,7 @@ namespace DoudizhuSharp
             player.SendCard(hiddenCards);
             GroupSender.Send($"底牌有{hiddenCards.ToCardString()}.");
             State = GameState.Gaming;
+            Cycle.CurrentIndex = Cycle.List.FindIndex(p => p.PlayerID == player.PlayerID);
             Tick();
         }
 

@@ -9,7 +9,7 @@ namespace DoudizhuSharp.Rules
 {
     public static class Ruler
     {
-        private static Type[] _rules = Assembly.GetExecutingAssembly()
+        private static readonly Type[] _rules = Assembly.GetExecutingAssembly()
             .ExportedTypes.Where(type => type.IsSubclassOf(typeof(Rule))).ToArray();
 
         public static bool IsValidate(Game game, ICollection<CardGroup> cardGroups)
