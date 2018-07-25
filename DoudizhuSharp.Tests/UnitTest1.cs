@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using DoudizhuSharp.Messages;
+using DoudizhuSharp.Rules;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DoudizhuSharp.Tests
@@ -43,6 +44,26 @@ namespace DoudizhuSharp.Tests
             MessageCore.ProcessMessage(new Message("123", "789", "开始游戏", "789"));
             Debug.WriteLine($"Second: {sw.ElapsedMilliseconds}ms");
 
+        }
+
+        [TestMethod]
+        public void Test4()
+        {
+            Assert.IsTrue(Ruler.GetRule("3".ParseCards()) is RuleSolo);
+            Assert.IsTrue(Ruler.GetRule("33".ParseCards()) is RulePair);
+            Assert.IsTrue(Ruler.GetRule("333".ParseCards()) is RuleTrio);
+            Assert.IsTrue(Ruler.GetRule("3334".ParseCards()) is RuleTrioWithSolo);
+            Assert.IsTrue(Ruler.GetRule("33344".ParseCards()) is RuleTrioWithPair);
+            Assert.IsTrue(Ruler.GetRule("34567".ParseCards()) is RuleSoloChain);
+            Assert.IsTrue(Ruler.GetRule("334455".ParseCards()) is RulePairChain);
+            Assert.IsTrue(Ruler.GetRule("333444".ParseCards()) is RuleAirplain);
+            Assert.IsTrue(Ruler.GetRule("33344456".ParseCards()) is RuleAirplainWithSolo);
+            Assert.IsTrue(Ruler.GetRule("33344455".ParseCards()) is RuleAirplainWithSolo);
+            Assert.IsTrue(Ruler.GetRule("3334445566".ParseCards()) is RuleAirplainWithPair);
+            Assert.IsTrue(Ruler.GetRule("333345".ParseCards()) is RuleFourWithSolo);
+            Assert.IsTrue(Ruler.GetRule("33334455".ParseCards()) is RuleFourWithPair);
+            Assert.IsTrue(Ruler.GetRule("3333".ParseCards()) is RuleBomb);
+            Assert.IsTrue(Ruler.GetRule("小王大王".ParseCards()) is RuleJokerBomb);
         }
     }
 }

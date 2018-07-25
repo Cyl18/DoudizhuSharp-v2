@@ -84,7 +84,7 @@ namespace DoudizhuSharp.Rules
     {
         public RulePairChain(ICollection<CardGroup> cgs) : base(cgs)
         {
-            if (cgs.Count < 3 || cgs.Any(cg => cg.Count != 2) || !cgs.IsSequential() || cgs.Any(cg => cg.Value > Value.Ace)) throw new DoudizhuRuleException();
+            if (cgs.Count < 3 || cgs.Any(cg => cg.Count != 2) || !cgs.IsSequential() || cgs.Any(cg => (int)cg.Value > (int)Value.Ace)) throw new DoudizhuRuleException();
             ChainLength = cgs.Count;
             SmallestAmount = (int)cgs.First().Value;
         }
@@ -240,7 +240,7 @@ namespace DoudizhuSharp.Rules
         {
             var four = cgs.Where(cg => cg.Count == 4).ToList();
             var two = cgs.Where(cg => cg.Count == 2).ToList();
-            if (four.Count != 1 || two.Count != 2 || cgs.Count(cg => cg.Count != 2 || cg.Count != 4) > 0) throw new DoudizhuRuleException();
+            if (four.Count != 1 || two.Count != 2 || cgs.Count(cg => cg.Count != 2 && cg.Count != 4) > 0) throw new DoudizhuRuleException();
 
             FourAmount = (int)four.First().Value;
         }

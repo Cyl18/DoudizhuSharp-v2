@@ -31,9 +31,35 @@ namespace DoudizhuSharp.Rules
                 {
                     // ignore
                 }
+                catch (TargetInvocationException)
+                {
+                    // ignore
+                }
             }
 
             return false;
+        }
+
+        public static Rule GetRule(ICollection<CardGroup> cardGroups)
+        {
+            foreach (var ruleType in _rules)
+            {
+                try
+                {
+                    var rule = CreateRule(ruleType, cardGroups);
+                    return rule;
+                }
+                catch (DoudizhuRuleException)
+                {
+                    // ignore
+                }
+                catch (TargetInvocationException)
+                {
+                    // ignore
+                }
+            }
+
+            return null;
         }
 
         private static Rule CreateRule(Type type, ICollection<CardGroup> cardGroups)
@@ -46,7 +72,7 @@ namespace DoudizhuSharp.Rules
             //Debug.Assert(groups.Count != 0); // CardGroups 不应为 0
             Debug.Assert(groups.All(cg => cg.Count != 0)); // CardGroup 的 Card Count 不应为 0
             
-            if (groups.Any(cg => cg.Count != 1)) return false;
+            //if (groups.Any(cg => cg.Count != 1)) return false;
             return groups.IsSequential(g => (int)g.Value);
         }
 

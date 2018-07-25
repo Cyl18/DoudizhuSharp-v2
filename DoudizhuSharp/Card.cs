@@ -127,6 +127,7 @@ namespace DoudizhuSharp
             }
 
             if (source.Length != 0) throw new DoudizhuCardParseException("无法处理");
+            list.Sort();
             return list;
         }
 
@@ -198,7 +199,7 @@ namespace DoudizhuSharp
         }
     }
 
-    public struct CardGroup
+    public struct CardGroup : IComparable<CardGroup>
     {
         public Value Value;
         public int Count;
@@ -207,6 +208,31 @@ namespace DoudizhuSharp
         {
             Value = value;
             Count = count;
+        }
+
+        public int CompareTo(CardGroup other)
+        {
+            return Value.CompareTo(other.Value);
+        }
+
+        public static bool operator <(CardGroup left, CardGroup right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        public static bool operator >(CardGroup left, CardGroup right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator <=(CardGroup left, CardGroup right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >=(CardGroup left, CardGroup right)
+        {
+            return left.CompareTo(right) >= 0;
         }
     }
 /*
