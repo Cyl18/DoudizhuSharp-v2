@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoudizhuSharp.Console", "Do
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoudizhuSharp.Tests", "DoudizhuSharp.Tests\DoudizhuSharp.Tests.csproj", "{CCF81167-62FC-4A2C-B341-84CD1DDF65A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cyl18.DoudizhuSharp.CQP", "Cyl18.DoudizhuSharp.CQP\Cyl18.DoudizhuSharp.CQP.csproj", "{0506D9E9-03E2-4440-80BE-810CCCFC0F46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,14 @@ Global
 		{CCF81167-62FC-4A2C-B341-84CD1DDF65A4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CCF81167-62FC-4A2C-B341-84CD1DDF65A4}.Release|x86.ActiveCfg = Release|Any CPU
 		{CCF81167-62FC-4A2C-B341-84CD1DDF65A4}.Release|x86.Build.0 = Release|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Debug|x86.Build.0 = Debug|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Release|x86.ActiveCfg = Release|Any CPU
+		{0506D9E9-03E2-4440-80BE-810CCCFC0F46}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

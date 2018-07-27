@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DoudizhuSharp.Rules
 {
-
+    [RuleName("喵喵喵???????")]
     public abstract class Rule //<T> where T : Rule<T> 傻逼C#泛型
     {
         public abstract SpecialRuleInfo[] Specials { get; }
@@ -19,11 +19,25 @@ namespace DoudizhuSharp.Rules
         public abstract bool IsValidate(Rule lastRule);
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    sealed class RuleNameAttribute : Attribute
+    {
+        public string Name { get; }
+
+        // See the attribute guidelines at 
+        //  http://go.microsoft.com/fwlink/?LinkId=85236
+        public RuleNameAttribute(string name)
+        {
+            Name = name;
+        }
+    }
+
     public class SpecialRuleInfo
     {
         //TODO 王炸
     }
 
+    [RuleName("单牌")]
     public class RuleSolo : Rule
     {
         public RuleSolo(ICollection<CardGroup> cgs) : base(cgs)
@@ -42,6 +56,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("对子")]
     public class RulePair : Rule
     {
         public RulePair(ICollection<CardGroup> cgs) : base(cgs)
@@ -60,6 +75,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("顺子")]
     public class RuleSoloChain : Rule
     {
         public RuleSoloChain(ICollection<CardGroup> cgs) : base(cgs)
@@ -80,6 +96,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("连对")]
     public class RulePairChain : Rule
     {
         public RulePairChain(ICollection<CardGroup> cgs) : base(cgs)
@@ -100,6 +117,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("三张")]
     public class RuleTrio : Rule
     {
         public RuleTrio(ICollection<CardGroup> cgs) : base(cgs)
@@ -118,6 +136,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("飞机")]
     public class RuleAirplain : Rule
     {
         public RuleAirplain(ICollection<CardGroup> cgs) : base(cgs)
@@ -137,7 +156,7 @@ namespace DoudizhuSharp.Rules
             return last.ChainLength == ChainLength && SmallestAmount > last.SmallestAmount;
         }
     }
-
+    [RuleName("三带一")]
     public class RuleTrioWithSolo : Rule
     {
         public RuleTrioWithSolo(ICollection<CardGroup> cgs) : base(cgs)
@@ -154,7 +173,7 @@ namespace DoudizhuSharp.Rules
             return TrioAmount > last.TrioAmount;
         }
     }
-
+    [RuleName("三带二")]
     public class RuleTrioWithPair : Rule
     {
         public RuleTrioWithPair(ICollection<CardGroup> cgs) : base(cgs)
@@ -171,7 +190,7 @@ namespace DoudizhuSharp.Rules
             return TrioAmount > last.TrioAmount;
         }
     }
-
+    [RuleName("飞机")]
     public class RuleAirplainWithSolo : Rule
     {
         public RuleAirplainWithSolo(ICollection<CardGroup> cgs) : base(cgs)
@@ -192,7 +211,7 @@ namespace DoudizhuSharp.Rules
             return ChainLength == last.ChainLength && SmallestTrio > last.SmallestTrio;
         }
     }
-
+    [RuleName("飞机")]
     public class RuleAirplainWithPair : Rule
     {
         public RuleAirplainWithPair(ICollection<CardGroup> cgs) : base(cgs)
@@ -214,6 +233,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("四带二")]
     public class RuleFourWithSolo : Rule
     {
         public RuleFourWithSolo(ICollection<CardGroup> cgs) : base(cgs)
@@ -234,6 +254,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("四带二")]
     public class RuleFourWithPair : Rule
     {
         public RuleFourWithPair(ICollection<CardGroup> cgs) : base(cgs)
@@ -254,6 +275,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("炸弹")]
     public class RuleBomb : Rule
     {
         public RuleBomb(ICollection<CardGroup> cgs) : base(cgs)
@@ -277,6 +299,7 @@ namespace DoudizhuSharp.Rules
         }
     }
 
+    [RuleName("王炸")]
     public class RuleJokerBomb : Rule
     {
         public RuleJokerBomb(ICollection<CardGroup> cgs) : base(cgs)
