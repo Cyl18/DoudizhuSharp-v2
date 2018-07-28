@@ -35,6 +35,10 @@ namespace DoudizhuSharp.Rules
                 {
                     // ignore
                 }
+                catch (InvalidCastException)
+                {
+                    // ignore
+                }
             }
 
             return false;
