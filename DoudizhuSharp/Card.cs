@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DoudizhuSharp.Extensions;
+using DoudizhuSharp.Messages;
 using EnumsNET;
 using GammaLibrary.Extensions;
 
@@ -74,7 +75,7 @@ namespace DoudizhuSharp
 
         public override string ToString()
         {
-            return $"[{(CardValue.GetAttributes()[0] as SymbolAttribute).Symbols[0]}]";
+            return $"[{(CardValue.GetAttributes()[0] as SymbolAttribute)?.Symbols[0]}]";
         }
     }
 
@@ -115,8 +116,9 @@ namespace DoudizhuSharp
                 .ToDictionary(obj => obj.str, obj => obj.member.Value);
         }
 
-        public static ICollection<CardGroup> ParseCards(this string source)
+        public static List<CardGroup> ParseCards(this Message message)
         {
+            var source = message.Content;
             var list = new List<CardGroup>();
             foreach (var pair in Values)
             {
@@ -131,7 +133,7 @@ namespace DoudizhuSharp
             return list;
         }
 
-        public static ICollection<Card> ToCards(this IEnumerable<CardGroup> cardGroups)
+        public static List<Card> ToCards(this IEnumerable<CardGroup> cardGroups)
         {
             return cardGroups.ToCardsInternal().ToList();
         }

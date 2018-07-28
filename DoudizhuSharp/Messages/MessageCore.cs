@@ -21,9 +21,9 @@ namespace DoudizhuSharp.Messages
                 if (!CommandHelper.Invoke(message) && GamesManager.Games.ContainsKey(message.Group))
                 {
                     var game = GamesManager.Games[message.Group];
-                    if (game.ContainsPlayer(message.Sender) && game.CurrentPlayer.PlayerID == message.Sender)
+                    if (game.ContainsPlayer(message.Sender) && game.CurrentPlayer.PlayerID == message.Sender && game.State == GameState.Gaming)
                     {
-                        game.PlayerSendCard(game.CurrentPlayer, message.Content.ParseCards());
+                        game.PlayerSendCard(game.CurrentPlayer, message.ParseCards());
                     }
                 }
 #if !Test
