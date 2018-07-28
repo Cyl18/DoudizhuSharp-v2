@@ -223,10 +223,15 @@ namespace DoudizhuSharp
 
         [Strings("过", "pass"), CommandDescription("过牌。")]
         [StateOnly(GameState.Gaming), PlayerOnly(PlayerState.CurrentPlayer)]
-        void Pass([Inject] Game game)
+        void Pass([Inject] Game game, [Inject] Player player)
         {
-            game.Cycle.MoveNext();
-            game.Tick();
+            if (game.Cycle.CurrentIndex == game.LastSendIndex)
+                game.GroupSender.Send("你不能过牌！");
+            else
+            {
+                game.Cycle.MoveNext();
+                game.Tick();
+            }
         }
         
     }
