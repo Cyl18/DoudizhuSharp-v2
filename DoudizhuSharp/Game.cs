@@ -114,12 +114,16 @@ namespace DoudizhuSharp
 
         }
 
-        public void PlayerSendCard(Player player, ICollection<CardGroup> cards)
+        public void PlayerSendCard(Player player, ICollection<CardGroup> cardGroups)
         {
-            if (Ruler.IsValidateForPlayer(player.Cards.ToCardGroups(), cards) && Ruler.IsValidate(this, cards))
+            if (Ruler.IsValidateForPlayer(player.Cards.ToCardGroups(), cardGroups) && Ruler.IsValidate(this, cardGroups))
             {
-                player.RemoveCard(cards.ToCards());
+                var cards = cardGroups.ToCards();
+                player.RemoveCard(cards);
                 LastSendIndex = Cycle.List.FindIndex(p => p == player);
+                var stringBuilder = new StringBuilder();
+                cards.ForEach(card => stringBuilder.Append(card));
+                GroupSender.Send($"{player.ToAtCode()} 出牌: {stringBuilder}");
                 Cycle.MoveNext();
                 Tick();
             }
@@ -223,10 +227,15 @@ namespace DoudizhuSharp
 
         [Strings("过", "pass"), CommandDescription("过牌。")]
         [StateOnly(GameState.Gaming), PlayerOnly(PlayerState.CurrentPlayer)]
-        void Pass([Inject] Game game)
+        void Pass([Inject] Game game, [Inject] Player player)
         {
-            game.Cycle.MoveNext();
-            game.Tick();
+            if (game.Cycle.CurrentIndex == game.LastSendIndex)
+                game.GroupSender.Send("你不能过牌！");
+            else
+            {
+                game.Cycle.MoveNext();
+                game.Tick();
+            }
         }
         
     }
