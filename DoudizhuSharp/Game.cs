@@ -121,9 +121,8 @@ namespace DoudizhuSharp
                 var cards = cardGroups.ToCards();
                 player.RemoveCard(cards);
                 LastSendIndex = Cycle.List.FindIndex(p => p == player);
-                var stringBuilder = new StringBuilder();
-                cards.ForEach(card => stringBuilder.Append(card));
-                GroupSender.Send($"{player.ToAtCode()} 出牌: {stringBuilder}");
+
+                GroupSender.Send($"{player.ToAtCode()} 出牌: {cards.ToCardString()}");
                 Cycle.MoveNext();
                 Tick();
             }

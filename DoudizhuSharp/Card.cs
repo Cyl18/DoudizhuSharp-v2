@@ -116,9 +116,8 @@ namespace DoudizhuSharp
                 .ToDictionary(obj => obj.str, obj => obj.member.Value);
         }
 
-        public static List<CardGroup> ParseCards(this Message message)
+        public static ICollection<CardGroup> ParseCards(this string source)
         {
-            var source = message.Content;
             var list = new List<CardGroup>();
             foreach (var pair in Values)
             {
@@ -133,7 +132,7 @@ namespace DoudizhuSharp
             return list;
         }
 
-        public static List<Card> ToCards(this IEnumerable<CardGroup> cardGroups)
+        public static ICollection<Card> ToCards(this IEnumerable<CardGroup> cardGroups)
         {
             return cardGroups.ToCardsInternal().ToList();
         }
@@ -172,7 +171,7 @@ namespace DoudizhuSharp
             return cards.Select(card => card.ToString()).StringJoin("");
         }
 
-        public static ICollection<CardGroup> ToCardGroups(this ICollection<Card> cards)
+        public static ICollection<CardGroup> ToCardGroups(this IEnumerable<Card> cards)
         {
             return cards.CloneAndSort().ExtractCardGroupsInternal();
         }

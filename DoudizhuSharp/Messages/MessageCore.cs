@@ -23,7 +23,7 @@ namespace DoudizhuSharp.Messages
                     var game = GamesManager.Games[message.Group];
                     if (game.ContainsPlayer(message.Sender) && game.CurrentPlayer.PlayerID == message.Sender && game.State == GameState.Gaming)
                     {
-                        game.PlayerSendCard(game.CurrentPlayer, message.ParseCards());
+                        game.PlayerSendCard(game.CurrentPlayer, message.Content.ParseCards());
                     }
                 }
 #if !Test
