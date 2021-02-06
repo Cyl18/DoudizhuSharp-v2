@@ -218,7 +218,7 @@ namespace DoudizhuSharp.Rules
         {
             var trios = cgs.Where(cg => cg.Count == 3).ToList();
             var nonTrios = cgs.Where(cg => cg.Count != 3).ToCards().ToList();
-            if (trios.Count * 2 != nonTrios.Count || !trios.IsSequential() || trios.Any(cg => cg.Value > Value.Ace)) throw new DoudizhuRuleException();
+            if (trios.Count * 2 != nonTrios.Count || cgs.Where(cg => cg.Count != 3).Any(cg => cg.Count % 2 != 0) || !trios.IsSequential() || trios.Any(cg => cg.Value > Value.Ace)) throw new DoudizhuRuleException();
             SmallestTrio = (int)trios.First().Value;
             ChainLength = trios.Count;
         }
