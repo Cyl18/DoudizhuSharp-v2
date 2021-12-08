@@ -152,7 +152,7 @@ namespace DoudizhuSharp
                 foreach (var (r, cards) in list)
                 {
                     var desc = r.GetType().GetCustomAttribute<RuleNameAttribute>().Name;
-                    sb.AppendLine($"{count++}.{desc}: {cardGroups.ToCards().ToCardString()}");
+                    sb.AppendLine($"{count++}.{desc}: {cards.ToCards().ToCardString()}");
                 }
 
                 var cards1 = cardGroups.ToCards();
