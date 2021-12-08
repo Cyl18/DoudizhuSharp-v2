@@ -16,7 +16,7 @@ namespace DoudizhuSharp.Rules
             CardGroups = cgs;
         }
 
-        public abstract bool IsValidate(Rule lastRule);
+        public abstract bool IsValid(Rule lastRule);
     }
 
     [AttributeUsage(AttributeTargets.Class)]
@@ -49,7 +49,7 @@ namespace DoudizhuSharp.Rules
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
         private int Amount { get; }
 
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleSolo) lastRule;
             return Amount > last.Amount;
@@ -68,7 +68,7 @@ namespace DoudizhuSharp.Rules
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
         private int Amount { get; }
 
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RulePair)lastRule;
             return Amount > last.Amount;
@@ -89,7 +89,7 @@ namespace DoudizhuSharp.Rules
         private readonly int ChainLength;
 
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleSoloChain) lastRule;
             return last.ChainLength == ChainLength && SmallestAmount > last.SmallestAmount;
@@ -110,7 +110,7 @@ namespace DoudizhuSharp.Rules
         private readonly int ChainLength;
 
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RulePairChain)lastRule;
             return last.ChainLength == ChainLength && SmallestAmount > last.SmallestAmount;
@@ -129,7 +129,7 @@ namespace DoudizhuSharp.Rules
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
         private int Amount { get; }
 
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleTrio)lastRule;
             return Amount > last.Amount;
@@ -150,7 +150,7 @@ namespace DoudizhuSharp.Rules
         private readonly int ChainLength;
 
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleAirplain)lastRule;
             return last.ChainLength == ChainLength && SmallestAmount > last.SmallestAmount;
@@ -167,7 +167,7 @@ namespace DoudizhuSharp.Rules
 
         private readonly int TrioAmount;
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleTrioWithSolo) lastRule;
             return TrioAmount > last.TrioAmount;
@@ -184,7 +184,7 @@ namespace DoudizhuSharp.Rules
 
         private readonly int TrioAmount;
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleTrioWithPair)lastRule;
             return TrioAmount > last.TrioAmount;
@@ -205,7 +205,7 @@ namespace DoudizhuSharp.Rules
         private readonly int SmallestTrio;
         private readonly int ChainLength;
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleAirplainWithSolo) lastRule;
             return ChainLength == last.ChainLength && SmallestTrio > last.SmallestTrio;
@@ -226,7 +226,7 @@ namespace DoudizhuSharp.Rules
         private readonly int SmallestTrio;
         private readonly int ChainLength;
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleAirplainWithPair)lastRule;
             return ChainLength == last.ChainLength && SmallestTrio > last.SmallestTrio;
@@ -247,7 +247,7 @@ namespace DoudizhuSharp.Rules
 
         private readonly int FourAmount;
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleFourWithSolo)lastRule;
             return FourAmount > last.FourAmount;
@@ -268,12 +268,38 @@ namespace DoudizhuSharp.Rules
 
         private readonly int FourAmount;
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             var last = (RuleFourWithPair)lastRule;
             return FourAmount > last.FourAmount;
         }
     }
+
+
+    [RuleName("软炸弹")]
+    public class RuleSoftBomb : Rule
+    {
+        public RuleSoftBomb(ICollection<CardGroup> cgs) : base(cgs)
+        {
+            var cg = cgs.First();
+            if (cgs.Count != 1 || cg.Count < 4) throw new DoudizhuRuleException();
+            BombCardCount = cg.Count;
+            BombAmount = (int)cg.Value;
+        }
+
+        private readonly int BombAmount;
+        private readonly int BombCardCount;
+        public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
+        public override bool IsValid(Rule lastRule)
+        {
+            if (lastRule is not RuleSoftBomb && lastRule is not RuleBomb && lastRule is not RuleJokerBomb) return true;
+
+            var last = (RuleSoftBomb)lastRule;
+            return BombCardCount > last.BombCardCount ||
+                   (BombCardCount == last.BombCardCount && BombAmount > last.BombAmount);
+        }
+    }
+
 
     [RuleName("炸弹")]
     public class RuleBomb : Rule
@@ -289,9 +315,9 @@ namespace DoudizhuSharp.Rules
         private readonly int BombAmount;
         private readonly int BombCardCount;
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
-            if (!(lastRule is RuleBomb) && !(lastRule is RuleJokerBomb)) return true;
+            if (lastRule is not RuleBomb && lastRule is not RuleJokerBomb) return true;
             
             var last = (RuleBomb)lastRule;
             return BombCardCount > last.BombCardCount ||
@@ -310,7 +336,7 @@ namespace DoudizhuSharp.Rules
 
 
         public override SpecialRuleInfo[] Specials { get; } = new SpecialRuleInfo[0];
-        public override bool IsValidate(Rule lastRule)
+        public override bool IsValid(Rule lastRule)
         {
             return !(lastRule is RuleJokerBomb);
         }

@@ -315,7 +315,7 @@ namespace DoudizhuSharp
                         default:
                             throw new NotSupportedException("Fork 您");
                     }
-                    callbacks.ForEach(c => c());
+                    callbacks.ForEach(c => c()).ToArray();
                     // TODO
                     return true;
                 }

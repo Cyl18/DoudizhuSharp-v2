@@ -4,22 +4,23 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using GammaLibrary.Extensions;
 
 namespace DoudizhuSharp.Rules
 {
     public static class Ruler
     {
         private static readonly Type[] _rules = Assembly.GetExecutingAssembly()
-            .ExportedTypes.Where(type => type.IsSubclassOf(typeof(Rule))).ToArray();
+            .ExportedTypes.Where(type => type.IsSubclassOf(typeof(Rule))).Where(type => type != typeof(RuleBomb) && type != typeof(RuleSoftBomb)).ToArray();
 
-        public static bool IsValidate(Game game, ICollection<CardGroup> cardGroups)
+        public static bool IsValid(Game game, ICollection<CardGroup> cardGroups, bool transformedAnyCard = false)
         {
-            foreach (var ruleType in _rules)
+            foreach (var ruleType in _rules.Concat((transformedAnyCard ? typeof(RuleSoftBomb) : typeof(RuleBomb)).AsArray()))
             {
                 try
                 {
                     var rule = CreateRule(ruleType, cardGroups);
-                    if (game.LastRule != null && !rule.IsValidate(game.LastRule))
+                    if (game.LastRule != null && !rule.IsValid(game.LastRule))
                     {
                         throw new DoudizhuRuleException();
                     }
@@ -44,13 +45,19 @@ namespace DoudizhuSharp.Rules
             return false;
         }
 
-        public static Rule GetRule(ICollection<CardGroup> cardGroups)
+        public static Rule GetRule(Game game, ICollection<CardGroup> cardGroups, bool transformedAnyCard = false)
         {
-            foreach (var ruleType in _rules)
+            foreach (var ruleType in _rules.Concat((transformedAnyCard ? typeof(RuleSoftBomb) : typeof(RuleBomb)).AsArray()))
             {
                 try
                 {
                     var rule = CreateRule(ruleType, cardGroups);
+                    if (game.LastRule != null && !rule.IsValid(game.LastRule))
+                    {
+                        throw new DoudizhuRuleException();
+                    }
+
+                    //game.LastRule = rule;
                     return rule;
                 }
                 catch (DoudizhuRuleException)
@@ -58,6 +65,10 @@ namespace DoudizhuSharp.Rules
                     // ignore
                 }
                 catch (TargetInvocationException)
+                {
+                    // ignore
+                }
+                catch (InvalidCastException)
                 {
                     // ignore
                 }
@@ -90,7 +101,7 @@ namespace DoudizhuSharp.Rules
             return valueSelector(groups.Last()) - valueSelector(groups.First()) + 1 == groups.Count;
         }
 
-        public static bool IsValidateForPlayer(ICollection<CardGroup> playerCards, ICollection<CardGroup> cards)
+        public static bool IsValidForPlayer(ICollection<CardGroup> playerCards, ICollection<CardGroup> cards)
         {
             Debug.Assert(playerCards.ToCards().OrderBy(c => c.CardValue).SequenceEqual(playerCards.ToCards()));
             Debug.Assert(cards.ToCards().OrderBy(c => c.CardValue).SequenceEqual(cards.ToCards()));

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using DoudizhuSharp.Messages;
 using DoudizhuSharp.Rules;
@@ -23,12 +25,23 @@ namespace DoudizhuSharp
     
     public class Game
     {
+        public Value AnyCardValue = Value.Three;
+
         public GameInitSettings GameSettings { get; } = new GameInitSettings();
         public Cycle<Player> Cycle { get; } = new Cycle<Player>();
         public ICollection<Player> Players => Cycle.List;
         public GameState State { get; private set; } = GameState.Prepairing;
-        public StateData StateData => States[State];
-        private Dictionary<GameState, StateData> States { get; } = new Dictionary<GameState, StateData>();
+
+        public StateData StateData
+        {
+            get => States[State];
+            set => States[State] = value;
+        }
+
+        private Dictionary<GameState, StateData> States { get; } = new()
+        {
+            { GameState.ChooseLandlord, new ChooseLandlordData() }
+        };
         public Rule LastRule { get; internal set; }
         public TargetSender GroupSender { get; }
         public string GameID { get; }
@@ -43,9 +56,8 @@ namespace DoudizhuSharp
 
         public void StartGame()
         {
-            Cycle.List.Randomize(); // 洗玩家
+            Cycle.List.Shuffle(); // 洗玩家
             State = GameState.ChooseLandlord;
-            States[State] = new ChooseLandlordData();
             SendCards();
             SendChooseLandlordInfo();
         }
@@ -62,7 +74,7 @@ namespace DoudizhuSharp
 
             var hideCardCount = (int)decks % Players.Count + Players.Count;
             var deck = Enumerable.Repeat(CardHelper.GetDeck(), (int)GameSettings.Deck).SelectMany(card => card).ToArray();
-            deck.Randomize(); // 洗牌
+            deck.Shuffle(); // 洗牌
             
             // 底牌
             var hideCards = deck.Take(hideCardCount).ToArray();
@@ -110,31 +122,166 @@ namespace DoudizhuSharp
                 LastRule = null;
             }
 
-            GroupSender.Send($"{CurrentPlayer.ToAtCode()} 该你出牌了");
+            GroupSender.Send($"{CurrentPlayer.ToAtCode()} 该你出牌了{(LastRule != null ? $", 当前规则为{LastRule.GetType().GetCustomAttribute<RuleNameAttribute>().Name}" : "")}");
 
         }
 
         public void PlayerSendCard(Player player, ICollection<CardGroup> cardGroups)
         {
-            if (Ruler.IsValidateForPlayer(player.Cards.ToCardGroups(), cardGroups) && Ruler.IsValidate(this, cardGroups))
+            if (!Ruler.IsValidForPlayer(player.Cards.ToCardGroups(), cardGroups))
+                goto invalid;
+
+            Rule rule;
+            if (cardGroups.Any(cg => cg.Value == AnyCardValue))
+            {
+                var processor = new AnyCardProcessor(this, AnyCardValue);
+                processor.Process(cardGroups);
+                var list = processor.ValidCardGroupsList;
+                if (list.Count == 0) goto invalid;
+                if (list.Count == 1)
+                {
+                    rule = list.First().rule;
+                    goto run;
+                }
+                // 多选
+                State = GameState.WaitAnyCard;
+                StateData = new SelectCardData() {ValidCardGroupsList = list};
+                var sb = new StringBuilder();
+                var count = 0;
+                sb.AppendLine("选择牌型:");
+                foreach (var (r, cards) in list)
+                {
+                    var desc = r.GetType().GetCustomAttribute<RuleNameAttribute>().Name;
+                    sb.AppendLine($"{count++}.{desc}: {cardGroups.ToCards().ToCardString()}");
+                }
+
+                var cards1 = cardGroups.ToCards();
+                player.RemoveCard(cards1);
+                LastSendIndex = Cycle.List.FindIndex(p => p == player);
+                GroupSender.Send($"{player.ToAtCode()} {sb.ToString()}");
+
+                return;
+            }
+            else
+            {
+                rule = Ruler.GetRule(this, cardGroups);
+            }
+
+            run:
+            if (rule is not null)
             {
                 var cards = cardGroups.ToCards();
                 player.RemoveCard(cards);
                 LastSendIndex = Cycle.List.FindIndex(p => p == player);
-
+                LastRule = rule;
                 GroupSender.Send($"{player.ToAtCode()} 出牌: {cards.ToCardString()}");
                 Cycle.MoveNext();
                 Tick();
             }
             else
             {
-                GroupSender.Send("你出的牌无效");
+                goto invalid;
+            }
+            return;
+
+            invalid:
+            GroupSender.Send("你出的牌无效");
+        }
+
+        public void EndAnyCard(Player player, string messageContent)
+        {
+            var state = (SelectCardData) StateData;
+            if (!messageContent.IsInt()) return;
+            
+            var index = messageContent.ToInt();
+            if (index >= state.ValidCardGroupsList.Count || index < 0)
+            { 
+                GroupSender.Send("索引越界.");
+                return;
+            }
+            var (rule, cards) = state.ValidCardGroupsList[index];
+
+            LastRule = rule;
+            State = GameState.Gaming;
+            GroupSender.Send($"{player.ToAtCode()} 出牌: {cards.ToCards().ToCardString()}");
+            Cycle.MoveNext();
+            Tick();
+        }
+    }
+
+    public class AnyCardProcessor
+    {
+        private Game game;
+        Value anyCardValue;
+        int gcount = -1;
+        public List<(Rule rule, CardGroup[] cards)> ValidCardGroupsList { get; } = new();
+
+        public AnyCardProcessor(Game game, Value anyCardValue)
+        {
+            this.game = game;
+            this.anyCardValue = anyCardValue;
+        }
+
+        public void Process(ICollection<CardGroup> originalCards)
+        {
+            var originalList = originalCards.ToArray();
+            var cardsBase = originalCards.ToArray();
+            
+            foreach (ref var cg in cardsBase.AsSpan())
+            {
+                if (cg.Value == anyCardValue)
+                {
+                    gcount = cg.Count;
+                    cg.Count = 0;
+                }
+            }
+
+            Manipulate(cardsBase, gcount);
+            Add(originalList, false);
+        }
+
+        private void Manipulate(CardGroup[] cardGroups, int count, int index = 0)
+        {
+            if (count == 0)
+            {
+                var mulp = cardGroups.Where(cg => cg.Count != 0).ToArray();
+                if (cardGroups.Single(cg => cg.Value == anyCardValue).Count == gcount) return;
+                
+                Add(mulp);
+                return;
+            }
+
+            for (var i = index; i < cardGroups.Length; i++)
+            {
+                if (cardGroups[i].Value is Value.ColoredJoker or Value.ColorlessJoker) 
+                    continue;
+                
+                cardGroups[i].Count++;
+                Manipulate(cardGroups, count - 1);
+                cardGroups[i].Count--;
+            }
+
+        }
+
+        void Add(CardGroup[] mulp, bool tr = true)
+        {
+            var rule = Ruler.GetRule(game, mulp, tr);
+            if (rule != null)
+            {
+                if (ValidCardGroupsList.Any(cg => cg.cards.SequenceEqual(mulp))) return;
+
+                ValidCardGroupsList.Add((rule, mulp));
             }
         }
     }
 
     public abstract class StateData
     {
+    }
+
+    public class SelectCardData : StateData
+    {
+        public List<(Rule rule, CardGroup[] cards)> ValidCardGroupsList { get; init; }
     }
 
     public class ChooseLandlordData : StateData

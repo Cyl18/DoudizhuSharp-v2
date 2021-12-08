@@ -200,7 +200,7 @@ namespace DoudizhuSharp
         }
     }
 
-    public struct CardGroup : IComparable<CardGroup>
+    public struct CardGroup : IComparable<CardGroup>, IEquatable<CardGroup>
     {
         public Value Value;
         public int Count;
@@ -234,6 +234,31 @@ namespace DoudizhuSharp
         public static bool operator >=(CardGroup left, CardGroup right)
         {
             return left.CompareTo(right) >= 0;
+        }
+
+        public bool Equals(CardGroup other)
+        {
+            return Value == other.Value && Count == other.Count;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CardGroup other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine((int) Value, Count);
+        }
+
+        public static bool operator ==(CardGroup left, CardGroup right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(CardGroup left, CardGroup right)
+        {
+            return !left.Equals(right);
         }
     }
 /*

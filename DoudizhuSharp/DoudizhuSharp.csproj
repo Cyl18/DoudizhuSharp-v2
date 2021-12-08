@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -11,14 +11,10 @@
 
   <ItemGroup>
     <PackageReference Include="Enums.NET" Version="2.3.2" />
+    <PackageReference Include="GammaLibrary" Version="2.3.0" />
     <PackageReference Include="Humanizer" Version="2.4.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="GammaLibrary">
-      <HintPath>..\..\GammaLibrary\GammaLibrary\bin\Debug\netstandard2.0\GammaLibrary.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
 </Project>

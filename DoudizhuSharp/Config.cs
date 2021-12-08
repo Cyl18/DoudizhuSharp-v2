@@ -6,7 +6,7 @@ using Number = System.Numerics.BigInteger;
 
 namespace DoudizhuSharp
 {
-    [Configuration("cygames")]
+    [ConfigurationPath("cygames.json")]
     public class Config : Configuration<Config>
     {
         static Config()

@@ -24,6 +24,12 @@ namespace DoudizhuSharp.Messages
                     if (game.ContainsPlayer(message.Sender) && game.CurrentPlayer.PlayerID == message.Sender && game.State == GameState.Gaming)
                     {
                         game.PlayerSendCard(game.CurrentPlayer, message.Content.ParseCards());
+                        return;
+                    }
+
+                    if (game.ContainsPlayer(message.Sender) && game.CurrentPlayer.PlayerID == message.Sender && game.State == GameState.WaitAnyCard)
+                    {
+                        game.EndAnyCard(game.CurrentPlayer, message.Content);
                     }
                 }
 #if !Test
